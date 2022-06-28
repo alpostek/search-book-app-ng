@@ -15,14 +15,10 @@ export class SearchcontainerComponent implements OnInit {
 
   handleSearch(inputValue: string){
     this.searchservice.getBooks(inputValue)
-   .subscribe((items: any) => {
-      this.books = items.map((item :any ) => {
-        return {
-          title: item.volumeInfo.title,
-          authors: item.volumeInfo.authors,
-          volumeLink: item.volumeInfo.infoLink
-        }
-      })
+   .subscribe((items: Book[]) => {
+      console.log(items)
+      this.books = items;
+      console.log(this.books)
    })
   }
 

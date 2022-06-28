@@ -13,7 +13,6 @@ export class SearchbarComponent implements OnInit {
   constructor() { }
 
   searchBooks(){
-    console.log(this.query)
     this.search.emit(this.query);
   }
 

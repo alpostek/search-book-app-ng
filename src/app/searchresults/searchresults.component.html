@@ -1,9 +1,10 @@
-<div>
-  <div *ngFor="let book of books">
+<ul>
+  <li *ngFor="let book of books">
     <div>
       <p>{{book.title}}</p>
       <p>{{book.authors}}</p>
-      <p>{{book.volumeLink}}</p>
+      <img src="{{book.coverImage}}">
+      <a href="{{book.volumeLink}}"> Learn more about the book</a>
     </div>
-  </div>
-</div>
+  </li>
+</ul>
