@@ -1,24 +1,26 @@
 import {environment} from "../environments/environment";
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from "rxjs";
-import { map, tap, catchError } from 'rxjs/operators';
-import { of} from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, Subject, throwError } from "rxjs";
+import { catchError, map, tap } from 'rxjs/operators';
 import { Book } from "./book";
 
 @Injectable({
   providedIn: 'root'
 })
 export class SearchService {
-
+//FIX ERROR HANDLINg
   private apiUrl = "https://www.googleapis.com/books/v1/volumes?key=";
   private apiKey = environment.apikey;
+  errorMessage = new Subject<string>();
+  errorMsg: string;
 
   constructor(private http: HttpClient) {}
 
   getBooks(query: string): Observable<Book[]>{
       const url = `${this.apiUrl}${this.apiKey}&q=${query}`;
       return this.http.get<Book[]>(url).pipe(
+        catchError(this.handleError.bind(this)),
         tap(response => {
           console.log(response)
         }),
@@ -42,4 +44,21 @@ export class SearchService {
         )
       )
   }
+
+  handleError(error: HttpErrorResponse ){
+    //let errorMsg;
+    if (error.status === 0) {
+      this.errorMsg = `An error occurred:, ${error.error} `;
+      console.error(this.errorMsg);
+    } else {
+      this.errorMsg = `Backend returned code ${error.status}, body was: ${error.error}`
+      console.error(this.errorMsg);
+    }
+    this.errorMessage.next('Something bad happened; please try again later.')
+    //return this.errorMessage
+    return throwError(() => new Error(this.errorMsg));
+  }
+
+
+
 }

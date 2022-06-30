@@ -1,2 +1,13 @@
-<app-searchbar (search)="handleSearch($event)"></app-searchbar>
+<div class="searchContainer">
+  <app-searchbar (search)="handleSearch($event)"></app-searchbar>
+<div *ngIf="error">
+  {{error}}
+</div>
+<div *ngIf="noResults">
+  No results found for this query
+</div>
 <app-searchresults [books]="books"></app-searchresults>
+</div>
+
+
+
