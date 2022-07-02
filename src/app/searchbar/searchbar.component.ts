@@ -1,4 +1,6 @@
-import { Component, ElementRef, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { QueryParams } from '../query-params';
+import { QueryParamsService } from '../query-params.service';
 //import { SearchService } from '../search.service';
 
 @Component({
@@ -8,12 +10,20 @@ import { Component, ElementRef, OnInit, Output, ViewChild, EventEmitter } from '
 })
 export class SearchbarComponent implements OnInit {
   query: string;
-  @ViewChild('searchbar') searchbar : ElementRef;
-  @Output() search: EventEmitter<string> = new EventEmitter<string>();
-  constructor() { }
+  param: string;
+
+  //@Output() search: EventEmitter<QueryParams> = new EventEmitter<QueryParams>();
+  @Output() search: EventEmitter<any> = new EventEmitter();
+
+  constructor(private paramsService: QueryParamsService) { }
 
   searchBooks(){
-    this.search.emit(this.query);
+    const parameters: QueryParams = {
+      query: this.query,
+      param: this.param
+    }
+    this.paramsService.passParams(parameters)
+    this.search.emit();
   }
 
   ngOnInit(): void {

@@ -1,5 +1,5 @@
 <div class="searchContainer">
-  <app-searchbar (search)="handleSearch($event)"></app-searchbar>
+ <app-searchbar (search)="handleSearch($event)"></app-searchbar>
 <div *ngIf="error">
   {{error}}
 </div>
@@ -7,6 +7,9 @@
   No results found for this query
 </div>
 <app-searchresults [books]="books"></app-searchresults>
+</div>
+<div *ngIf="booksLoaded && books.length" style="text-align: center;">
+  <button class="loadMore" (click)="handleLoadMore()">Load more</button>
 </div>
 
 
