@@ -10,6 +10,17 @@
 </div>
 <div *ngIf="booksLoaded && books.length" style="text-align: center;">
   <button class="loadMore" (click)="handleLoadMore()">Load more</button>
+  {{loadMoreMessage}}
+<!--
+  <ng-container *ngIf="loadMoreMessage", else load_button>
+
+  </ng-container>
+
+  <ng-template #load_button>
+
+  </ng-template> -->
+
+
 </div>
 
 

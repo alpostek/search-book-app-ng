@@ -1,7 +1,7 @@
 import {environment} from "../environments/environment";
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, Subject, Subscription, throwError } from "rxjs";
+import { BehaviorSubject, Observable, Subject, Subscription, throwError } from "rxjs";
 import { catchError, map, tap } from 'rxjs/operators';
 import { Book } from "./book";
 import { QueryParams } from "./query-params";
@@ -16,7 +16,7 @@ export class SearchService {
   errorMessage = new Subject<string>();
   errorMsg: string;
   currentQuery: QueryParams;
-  booksSet = new Subject<Book[]>()
+  noMoreBooksMsg = new Subject<string>();
 
   constructor(private http: HttpClient) {}
 
@@ -35,29 +35,33 @@ export class SearchService {
       const url = `${this.apiUrl}${this.apiKey}&maxResults=10&q=${this.currentQuery.param}${this.currentQuery.query}&startIndex=${this.currentQuery.startIndex ? this.currentQuery.startIndex : 0 }`;
       return this.http.get<Book[]>(url).pipe(
         catchError(this.handleError.bind(this)),
-        tap(response => {
+        tap((response : any) => {
           console.log(url)
           console.log(response)
+          if(this.currentQuery.startIndex && (this.currentQuery.startIndex > response.totalItems)){
+            console.log("no more books")
+            this.noMoreBooksMsg.next("No more books available")
+          }
         }),
         map((response: any) =>
         {
-          if (response.items){
-           return response.items.map((item: any) => {
-            return <Book> {
-              title: item.volumeInfo.title,
-              authors: item.volumeInfo.authors,
-              volumeLink: item.volumeInfo.infoLink,
-              coverImage: item.volumeInfo.imageLinks && item.volumeInfo.imageLinks.thumbnail
-              ? item.volumeInfo.imageLinks.thumbnail
-              : "https://via.placeholder.com/100x150"
-            }
-           })
+          if (response.items ){
+              return response.items.map((item: any) => {
+                return <Book> {
+                  title: item.volumeInfo.title,
+                  authors: item.volumeInfo.authors,
+                  volumeLink: item.volumeInfo.infoLink,
+                  coverImage: item.volumeInfo.imageLinks && item.volumeInfo.imageLinks.thumbnail
+                  ? item.volumeInfo.imageLinks.thumbnail
+                  : "https://via.placeholder.com/100x150"
+                }
+               })
           } else{
              return [];
           }
         },
-
         )
+
       )
   }
 

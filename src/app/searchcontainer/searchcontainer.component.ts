@@ -19,30 +19,37 @@ export class SearchcontainerComponent implements OnInit, OnDestroy {
   getBooks: Subscription;
   booksLoaded: boolean = false;
   counter: number = 0;
+  loadMoreMessageSub: Subscription;
+  loadMoreMessage: string;
 
   constructor(private searchservice: SearchService, private queryParamsService: QueryParamsService) { }
 
   handleSearch(event: any){
     this.getBooks = this.searchservice.getBooks()
    .subscribe((items: Book[]) => {
-    console.log("search")
       this.books = items;
-      this.booksLoaded = true;
-      if (!items.length) this.noResults = true;
+      this.setLoadingInfo(items)
    })
   }
 
   handleLoadMore(){
     this.counter++;
     this.queryParamsService.updateSearchIndex(this.counter)
-    this.getBooks = this.searchservice.getBooks()
+    this.searchservice.getBooks()
    .subscribe((items: Book[]) => {
-    console.log("load more books")
-      this.books = items;
-      this.booksLoaded = true;
-      if (!items.length) this.noResults = true;
-      //if (this.booksLoaded && items.length)//
+      this.books = this.books.concat(items);
+     this.setLoadingInfo(items)
    })
+   this.loadMoreMessageSub = this.searchservice.noMoreBooksMsg.subscribe(msg => {
+
+    this.loadMoreMessage = msg;
+    console.log(this.loadMoreMessage)
+   })
+  }
+
+  setLoadingInfo(bookArray: Book[]){
+    this.booksLoaded = true;
+    if (!bookArray.length) this.noResults = true;
   }
 
 
