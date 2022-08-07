@@ -18,18 +18,10 @@ export class SearchcontainerComponent implements OnInit, OnDestroy {
 
   constructor(private searchservice: SearchService) { }
 
-  handleSearch(inputValue: string){
-    this.getBooks = this.searchservice.getBooks(inputValue)
-   .subscribe((items: Book[]) => {
-      this.books = items;
-      if (!items.length) this.noResults = true;
-   })
-  }
-
   ngOnInit(): void {
-   this.errorMsg = this.searchservice.errorMessage.subscribe(msg => {
-      this.error = msg;
-    })
+  //  this.errorMsg = this.searchservice.errorMessage.subscribe(msg => {
+  //     this.error = msg;
+  //   })
   }
 
   ngOnDestroy(){

@@ -1,5 +1,5 @@
 <ul>
-  <li *ngFor="let book of books">
+  <li *ngFor="let book of books$ | async">
     <div>
       <p>{{book.title}}</p>
       <p>{{book.authors}}</p>

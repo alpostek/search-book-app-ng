@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
-//import { SearchService } from '../search.service';
+import { SearchService } from '../search.service';
 
 @Component({
   selector: 'app-searchbar',
@@ -9,11 +9,12 @@ import { Component, ElementRef, OnInit, Output, ViewChild, EventEmitter } from '
 export class SearchbarComponent implements OnInit {
   query: string;
   @ViewChild('searchbar') searchbar : ElementRef;
-  @Output() search: EventEmitter<string> = new EventEmitter<string>();
-  constructor() { }
+  //@Output() search: EventEmitter<string> = new EventEmitter<string>();
+  constructor(private searchService: SearchService) { }
 
-  searchBooks(){
-    this.search.emit(this.query);
+  searchBooks(): void{
+    //this.search.emit(this.query);
+    this.searchService.queryChanged(this.query)
   }
 
   ngOnInit(): void {

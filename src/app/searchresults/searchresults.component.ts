@@ -1,5 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { EMPTY } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { Book } from '../book';
+import { SearchService } from '../search.service';
 
 @Component({
   selector: 'app-searchresults',
@@ -8,10 +11,15 @@ import { Book } from '../book';
 })
 export class SearchresultsComponent implements OnInit {
 
-  @Input() books: Book[] = [];
-  constructor() { }
+  constructor(private searchService: SearchService) { }
 
   ngOnInit(): void {
   }
+
+  books$ = this.searchService.books$.pipe(
+    catchError(err => {
+      return EMPTY;
+    }) 
+  );
 
 }
