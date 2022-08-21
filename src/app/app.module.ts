@@ -6,14 +6,13 @@ import { FormsModule } from "@angular/forms";
 import { AppComponent } from './app.component';
 import { SearchbarComponent } from './searchbar/searchbar.component';
 import { SearchresultsComponent } from './searchresults/searchresults.component';
-import { SearchcontainerComponent } from './searchcontainer/searchcontainer.component';
+
 
 @NgModule({
   declarations: [
     AppComponent,
     SearchbarComponent,
-    SearchresultsComponent,
-    SearchcontainerComponent
+    SearchresultsComponent
   ],
   imports: [
     BrowserModule,

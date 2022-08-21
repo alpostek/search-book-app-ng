@@ -1,3 +1,9 @@
+<div *ngIf="noResults$ | async">
+  No results found for this query
+</div>
+<div class="alert" *ngIf="errorMessage$ | async as errorMessage">
+  {{ errorMessage }}
+</div>
 <ul>
   <li *ngFor="let book of books$ | async">
     <div>
@@ -8,3 +14,8 @@
     </div>
   </li>
 </ul>
+
+<button *ngIf="moreBooks$ | async as moreBooks" (click)="onLoadMore()">Load More</button>
+<!-- <div *ngIf="noMoreBooks$ | async">
+
+</div> -->
