@@ -1,8 +1,8 @@
 import {environment} from "../environments/environment";
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { BehaviorSubject, throwError, of, combineLatest, Subject } from "rxjs";
-import { catchError, map, tap, switchMap, distinctUntilChanged } from 'rxjs/operators';
+import { BehaviorSubject, throwError, of, combineLatest, Observable } from "rxjs";
+import { catchError, map, tap, switchMap, scan, concatMap} from 'rxjs/operators';
 import { Book } from "./book";
 
 @Injectable({
@@ -14,6 +14,8 @@ export class SearchService {
   private apiKey = environment.apikey;
   url = `${this.apiUrl}${this.apiKey}`;
 
+  fetch = new BehaviorSubject<void>(undefined)
+
   queryParamSubject = new BehaviorSubject<string>("");
   queryParamValue$ = this.queryParamSubject.asObservable();
 
@@ -23,23 +25,32 @@ export class SearchService {
   startIndex = new BehaviorSubject<number>(0);
   startIndex$ = this.startIndex.asObservable();
 
+  lastQuery : string;
   maxIndex = 40;
   areThereMoreBooksSubj = new BehaviorSubject<boolean>(false);
   areThereMoreBooks$ = this.areThereMoreBooksSubj.asObservable();
 
   constructor(private http: HttpClient) {}
 
-  books$ = combineLatest([
+  books$: Observable<Book[]> = combineLatest([
     this.queryParamValue$,
     this.startIndex$
   ]).pipe(
-      switchMap(([query, index]) => query ? 
+      switchMap(([query]) => 
+       query ? 
+       this.startIndex$.pipe(
+        switchMap((index) => 
         this.http.get<Book[]>(`${this.url}&q=${query}&startIndex=${index}&maxResults=20`).pipe(
           tap(response => {
+            console.log(query, index)
             console.log(response)
+            
           }),
           catchError(this.handleError),
           map((response: any) => {
+            if (query != this.lastQuery){
+              this.maxIndex = response.totalItems
+            }
             if (response.items){
               this.noResultsSubject.next(false);
               this.areThereMoreBooksSubj.next(this.maxIndex - this.startIndex.value > 0);
@@ -54,18 +65,21 @@ export class SearchService {
                   }
                 })
                 } else{
-                  console.log("here")
+                  console.log("tutaj")
                   this.noResultsSubject.next(true);
                   return [];
                 }
               })
-        //if query is empty (beginning of app) return observable of empty arr
-        ) : of([])
+          )
+        ), scan((all, page) => all.concat(page), [])
       )
+      : of([])
+      )     
   )
- 
+
   queryChanged(query: string): void{
     this.queryParamSubject.next(query)
+    this.lastQuery = query;
     this.startIndex.next(0);
   }
 
@@ -73,11 +87,15 @@ export class SearchService {
     this.queryParamSubject.next("");
     this.startIndex.next(0);
     this.areThereMoreBooksSubj.next(false);
+    this.noResultsSubject.next(false);
+    console.log("reset")
   }
 
   loadMoreBooks(): void{
     this.startIndex.next( this.startIndex.value + 20);
+    console.log(this.startIndex.value)
     //console.log(this.maxIndex - this.startIndex.value > 0);
+    //this.fetch.next();
     this.areThereMoreBooksSubj.next(this.maxIndex - this.startIndex.value > 0 );
   }
 
