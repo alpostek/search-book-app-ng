@@ -1,9 +1,10 @@
 import {environment} from "../environments/environment";
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { BehaviorSubject, throwError, of, combineLatest, Observable } from "rxjs";
+import { BehaviorSubject, throwError, of, combineLatest } from "rxjs";
 import { catchError, map, tap, switchMap, scan} from 'rxjs/operators';
 import { Book } from "./book";
+
 
 @Injectable({
   providedIn: 'root'
@@ -30,53 +31,53 @@ export class SearchService {
   areThereMoreBooksSubj = new BehaviorSubject<boolean>(false);
   areThereMoreBooks$ = this.areThereMoreBooksSubj.asObservable();
 
-
   constructor(private http: HttpClient) {}
 
-  books$: Observable<Book[]> = combineLatest([
-    this.queryParamValue$,
-    this.startIndex$
-  ]).pipe(
-      switchMap(([query]) => 
-       query ? 
-       this.startIndex$.pipe(
-        switchMap((index) => 
-        this.http.get<Book[]>(`${this.url}&q=${query}&startIndex=${index}&maxResults=20`).pipe(
-          tap(response => {
-            console.log(query, index)
-            console.log(response)
-            
-          }),
-          catchError(this.handleError),
-          map((response: any) => {
-            if (query != this.lastQuery){
-              this.maxIndex = response.totalItems
-            }
-            if (response.items){
-              this.noResultsSubject.next(false);
-              this.areThereMoreBooksSubj.next(this.maxIndex - this.startIndex.value > 0);
-                return response.items.map((item: any) => {
-                  return <Book> {
-                    title: item.volumeInfo.title,
-                    authors: item.volumeInfo.authors,
-                    volumeLink: item.volumeInfo.infoLink,
-                    coverImage: item.volumeInfo.imageLinks && item.volumeInfo.imageLinks.thumbnail
-                    ? item.volumeInfo.imageLinks.thumbnail
-                    : "https://via.placeholder.com/100x150"
+  books$ = combineLatest([
+      this.queryParamValue$,
+      this.startIndex$
+    ]).pipe(
+        switchMap(([query]) => 
+         query ? 
+         this.startIndex$.pipe(
+          switchMap((index) => 
+          this.http.get<Book[]>(`${this.url}&q=${query}&startIndex=${index}&maxResults=20`).pipe(
+            tap(response => {
+              console.log(query, index)
+              console.log(response)
+            }),
+            catchError(this.handleError),
+            map((response: any) => {
+              if (query != this.lastQuery){
+                this.maxIndex = response.totalItems
+              }
+              if (response.items){
+                this.noResultsSubject.next(false);
+                this.areThereMoreBooksSubj.next(this.maxIndex - this.startIndex.value > 0);
+                  return response.items.map((item: any) => {
+                    return <Book> {
+                      title: item.volumeInfo.title,
+                      authors: item.volumeInfo.authors,
+                      volumeLink: item.volumeInfo.infoLink,
+                      coverImage: item.volumeInfo.imageLinks && item.volumeInfo.imageLinks.thumbnail
+                      ? item.volumeInfo.imageLinks.thumbnail
+                      : "https://via.placeholder.com/100x150"
+                    }
+                  })
+                  } else{
+                    this.noResultsSubject.next(true);
+                    return [];
                   }
                 })
-                } else{
-                  console.log("tutaj")
-                  this.noResultsSubject.next(true);
-                  return [];
-                }
-              })
+            )
           )
-        ), scan((all, page) => all.concat(page), [])
-      )
-      : of([])
-      )     
-  )
+        )
+        : of([])
+        )
+        ,scan((allBooks, nextResult) => allBooks.concat(nextResult)
+        )    
+    )
+    
 
   queryChanged(query: string): void{
     this.queryParamSubject.next(query)
@@ -94,8 +95,6 @@ export class SearchService {
   loadMoreBooks(): void{
     this.startIndex.next( this.startIndex.value + 20);
     console.log(this.startIndex.value)
-    //console.log(this.maxIndex - this.startIndex.value > 0);
-    //this.fetch.next();
     this.areThereMoreBooksSubj.next(this.maxIndex - this.startIndex.value > 0 );
   }
 

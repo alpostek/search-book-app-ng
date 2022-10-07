@@ -16,7 +16,6 @@ export class SearchbarComponent implements AfterViewInit{
   ngAfterViewInit(): void {
     this.searchForm.form.valueChanges.subscribe(changes => {
       if(!changes.query && this.searchForm.form.dirty){
-        console.log("?")
         this.searchService.resetQuery();
       }   
     })
