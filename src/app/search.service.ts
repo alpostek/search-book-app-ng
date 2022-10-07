@@ -2,7 +2,7 @@ import {environment} from "../environments/environment";
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, throwError, of, combineLatest, Observable } from "rxjs";
-import { catchError, map, tap, switchMap, scan, concatMap} from 'rxjs/operators';
+import { catchError, map, tap, switchMap, scan} from 'rxjs/operators';
 import { Book } from "./book";
 
 @Injectable({
@@ -29,6 +29,7 @@ export class SearchService {
   maxIndex = 40;
   areThereMoreBooksSubj = new BehaviorSubject<boolean>(false);
   areThereMoreBooks$ = this.areThereMoreBooksSubj.asObservable();
+
 
   constructor(private http: HttpClient) {}
 
@@ -88,7 +89,6 @@ export class SearchService {
     this.startIndex.next(0);
     this.areThereMoreBooksSubj.next(false);
     this.noResultsSubject.next(false);
-    console.log("reset")
   }
 
   loadMoreBooks(): void{
